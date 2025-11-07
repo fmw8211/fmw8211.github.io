@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立冬礼物</title>
+    <!-- 微信预览配置 -->
+    <meta property="og:title" content="立冬快乐！满屏雪花的祝福" /> <!-- 预览标题 -->
+    <meta property="og:image" content="https://picsum.photos/id/292/400/300" /> <!-- 预览封面图（可替换成自己的图片链接） -->
+    <meta property="og:description" content="点击查收程序员专属的立冬浪漫～" /> <!-- 预览描述 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: #fff;
+            overflow: hidden;
+        }
+
+        /* 初始弹窗 - 简化样式，确保点击正常 */
+        .initial-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 35px 25px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-content h2 {
+            color: #4a3b2a;
+            font-size: 1.6rem;
+            margin-bottom: 30px;
+        }
+
+        .modal-confirm {
+            padding: 10px 25px;
+            background: #d8a767;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-confirm:hover {
+            background: #c28e4f;
+        }
+
+        /* 祝福小弹窗 - 确保可见、结构简单 */
+        .blessing-modal {
+            position: fixed;
+            padding: 22px 18px 15px;
+            border-radius: 8px;
+            border: 1px solid #e0d8cc;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 140px;
+            /* 更小更紧凑，避免拥挤 */
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            animation: pop 0.2s ease-out;
+        }
+
+        /* 提示标签 - 醒目不刺眼 */
+        .modal-tag {
+            position: absolute;
+            top: 6px;
+            left: 10px;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        .blessing-modal p {
+            color: #4a3b2a;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* 最终大弹窗 - 覆盖所有内容 */
+        .big-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            padding: 50px 30px;
+            background: #fff9e8;
+            /* 暖色调呼应立冬 */
+            border-radius: 16px;
+            border: 2px solid #d8a767;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 200;
+            /* 高于所有小弹窗 */
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .big-modal p {
+            color: #4a3b2a;
+            font-size: 2rem;
+            /* 比小弹窗大2倍 */
+            font-weight: 600;
+            line-height: 1.8;
+        }
+
+        /* 动画效果 */
+        @keyframes pop {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* 响应式 - 手机端适配 */
+        @media (max-width: 375px) {
+            .blessing-modal {
+                width: 120px;
+                height: 70px;
+            }
+
+            .blessing-modal p {
+                font-size: 0.9rem;
+            }
+
+            .big-modal p {
+                font-size: 1.5rem;
+                /* 手机端适当缩小，仍比小弹窗大 */
+            }
+
+            .big-modal {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 初始弹窗 -->
+    <div class="initial-modal" id="initialModal">
+        <div class="modal-content">
+            <h2>你有一份立冬礼物，确定要打开吗？</h2>
+            <button class="modal-confirm" id="confirmBtn">确定</button>
+        </div>
+    </div>
+
+    <script>
+        // 核心数据
+        const blessings = [
+            "天天开心", "别太累啦", "保持好心情", "我想你了", "梦想成真",
+            "别熬夜", "平安喜乐", "好好休息", "今天开心吗", "保持微笑呀",
+            "相信自己", "天冷了，多穿点衣服", "金榜题名", "烦恼都消失", "多喝水哦",
+            "记得吃水果", "顺顺利利", "元气满满", "期待下一次见面", "你超棒的"
+        ];
+        const bgColors = ['#fff9e8', '#f0f8fb', '#fef7fb', '#f5fafe', '#faf6ed'];
+
+        // 状态变量
+        let lastColorIdx = -1; // 上一个颜色索引
+        let popCount = 0; // 当前弹出弹窗数量
+        const maxPopCount = 100; // 最大小弹窗数量（可调整）
+
+        // DOM元素
+        const initialModal = document.getElementById('initialModal');
+        const confirmBtn = document.getElementById('confirmBtn');
+
+        // 点击确定 - 启动小弹窗
+        confirmBtn.addEventListener('click', () => {
+            initialModal.style.display = 'none';
+            popBlessing(); // 立即弹第一个小弹窗
+        });
+
+        // 弹出单个小弹窗（不消失）
+        function popBlessing() {
+            // 达到最大数量，停止小弹窗并显示大弹窗
+            if (popCount >= maxPopCount) {
+                setTimeout(showBigModal, 500); // 延迟0.5s，让最后一个小弹窗动画完成
+                return;
+            }
+
+            // 1. 获取不重复的背景色
+            const colorIdx = getDifferentColorIdx();
+            const bgColor = bgColors[colorIdx];
+            lastColorIdx = colorIdx;
+
+            // 2. 获取随机祝福
+            const blessing = blessings[Math.floor(Math.random() * blessings.length)];
+
+            // 3. 创建小弹窗
+            const modal = document.createElement('div');
+            modal.className = 'blessing-modal';
+            modal.style.backgroundColor = bgColor;
+            modal.innerHTML = `<span class="modal-tag">提示</span><p>${blessing}</p>`;
+
+            // 4. 计算随机位置（确保在屏幕内）
+            const modalWidth = 140; // 与CSS一致
+            const modalHeight = 80; // 与CSS一致
+            const maxX = window.innerWidth - modalWidth - 15; // 右边距15px
+            const maxY = window.innerHeight - modalHeight - 15; // 下边距15px
+            const x = Math.floor(Math.random() * maxX) + 10; // 左边距10px
+            const y = Math.floor(Math.random() * maxY) + 10; // 上边距10px
+            modal.style.left = `${x}px`;
+            modal.style.top = `${y}px`;
+            modal.style.zIndex = 99 + popCount; // 小弹窗层级递增
+
+            // 5. 添加到页面
+            document.body.appendChild(modal);
+
+            popCount++;
+            // 6. 递归调用 - 100ms后弹下一个
+            setTimeout(popBlessing, 100);
+        }
+
+        // 显示最终大弹窗（覆盖所有小弹窗）
+        function showBigModal() {
+            const bigModal = document.createElement('div');
+            bigModal.className = 'big-modal';
+            bigModal.innerHTML = `<p>如果心情不好，找我聊聊天吧😊</p>`;
+            document.body.appendChild(bigModal);
+        }
+
+        // 获取与上一个不同的颜色索引
+        function getDifferentColorIdx() {
+            let idx;
+            do {
+                idx = Math.floor(Math.random() * bgColors.length);
+            } while (idx === lastColorIdx);
+            return idx;
+        }
+    </script>
+</body>
+
+</html>
